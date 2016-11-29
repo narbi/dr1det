@@ -1,2 +1,2 @@
 # dr1det
-proximity detector for drone sz dji
+proximity detector for drones sz dji, parrot, etc.
