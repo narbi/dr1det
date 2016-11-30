@@ -2,28 +2,39 @@
 from tkinter import *
 from tkinter import messagebox
 import math
+from sys import platform
 import os
-
-top = Tk()
-top.geometry("200x200")
 
 def scanDrones():
     mac_addresses = ["60:60:1F", "90:03:B7", "A0:14:3D", "00:12:1C", "00:26:7E"]
 
-    # add check for OS
-    scan = os.popen("netsh wlan show network mode=bssid").read()
+    # check for cross platform functionality
+    if platform == "linux" or platform == "linux2":
+        scan = os.popen("airodump-ng wlan0").read()
+    elif platform == "darwin":
+        # command to get APs for OS X
+        scan = ""
+    elif platform == "win32":
+        scan = os.popen("netsh wlan show network mode=bssid").read()
+    ########
+    #dummy set of frequency (MHz)
+    frequency = 2412
+    #dummy set of signal level (dbm)
+    signalLevel = -57
+    ########
+    distance = get_distance(frequency, signalLevel)
+    messagebox.showinfo( "Drone detected", distance )
 
-    #get frequency
-    frequency = 2412  #MHz
+def get_distance(freq, signal):
+    #calculate distance (m)
+    distance = math.pow(10,((27.55 - (20 * math.log10(freq)) + signal)/20))
+    return distance
 
-    #get signal level
-    signalLevel = -57 #dbm
 
-    distance = math.pow(10,((27.55 - (20 * math.log10(frequency)) + signalLevel)/20))
+top = Tk()
+top.geometry("200x200")
 
-    messagebox.showinfo( "Searching..", distance)
-
-screen = Button(top, text ="start scanning", command = scanDrones)
-
+screen = Button(top, text ="Start scanning", command = scanDrones)
 screen.place(x=100, y=100)
+
 top.mainloop()
