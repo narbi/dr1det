@@ -10,12 +10,13 @@ def scanDrones():
 
     # check for cross platform functionality
     if platform == "linux" or platform == "linux2":
-        scan = os.popen("airodump-ng wlan0").read()
+        scan = os.popen("airodump-ng -d "+mac_addresses[0]+":00:00:00 -m FF:FF:FF:00:00:00 wlan0").read()
     elif platform == "darwin":
         # command to get APs for OS X
         scan = ""
     elif platform == "win32":
-        scan = os.popen("netsh wlan show network mode=bssid").read()
+        scan = os.popen("netsh wlan show network mode=bssid | finstr "+mac_addresses[0]+" Signal").read()
+
     ########
     #dummy set of frequency (MHz)
     frequency = 2412
