@@ -10,6 +10,7 @@ import math
 import base64
 from sys import platform
 import os
+import gmplot
 
 def scanDrones():
     # 60:60:1F = DJI Phanton
@@ -50,6 +51,9 @@ def deauth():
 
 top = Tk()
 top.geometry("200x200")
+
+gmap = gmplot.GoogleMapPlotter(37.428, -122.145, 16)
+gmap.draw("mymap.html")
 
 button = Button(top, text ="Start scanning", command = scanDrones)
 button.pack(side=TOP)
