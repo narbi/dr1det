@@ -36,7 +36,8 @@ def scanDrones():
 def get_distance(signal):
     #calculate distance (m)
     frequency = 2412 #dummy set of frequency (MHz)
-    distance = math.pow(10,((27.55 - (20 * math.log10(frequency)) + signal)/20))
+    exp = (27.55 - (20 * math.log10(frequency)) + abs(signal)) / 20.0;
+    distance = math.pow(10,exp)
     return distance
 
 def deauth():
