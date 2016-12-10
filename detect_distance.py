@@ -15,9 +15,7 @@ import gmplot
 def scanDrones():
     # 60:60:1F = DJI Phanton
     # 90:03:B7, A0:14:3D, 00:12:1C, 00:26:7E = Parrot
-
     mac_addresses = ["60:60:1F", "90:03:B7", "A0:14:3D", "00:12:1C", "00:26:7E"]
-
     # check for cross platform functionality
     if platform == "linux" or platform == "linux2":
         scan = os.popen("airodump-ng -d "+mac_addresses[0]+":00:00:00 -m FF:FF:FF:00:00:00 wlan0").read()
@@ -25,13 +23,22 @@ def scanDrones():
         # command to get APs for OS X
         pass
     elif platform == "win32":
+        #scan = os.popen("netsh wlan show network mode=bssid | findstr \"42:07:26 Signal\"").read()
         scan = os.popen("netsh wlan show network mode=bssid | findstr \""+mac_addresses[0]+" Signal\"").read()
+        if 'BSSID' in scan:
+            pos = scan.find('BSSID')
+            quality = scan[pos:].split('Signal')
+            quality = quality[1].split(':')
+            quality = quality[1].split('%')
+            dBm = (int(quality[0]) / 2) - 100
+            found = True
+        else:
+            found = False
 
-    #dummy set of signal level (dbm)
-    signalLevel = -57
+    if (found == True):
+        distance = get_distance(dBm)
+        messagebox.showinfo( "Drone detected", "Drone detected in "+str(distance)+" meters")
 
-    distance = get_distance(signalLevel)
-    messagebox.showinfo( "Drone detected", "Drone detected in "+str(distance)+" meters")
 
 def get_distance(signal):
     #calculate distance (m)
