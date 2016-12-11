@@ -17,28 +17,27 @@ def scanDrones():
     # 90:03:B7, A0:14:3D, 00:12:1C, 00:26:7E = Parrot
     mac_addresses = ["60:60:1F", "90:03:B7", "A0:14:3D", "00:12:1C", "00:26:7E"]
     # check for cross platform functionality
-    if platform == "linux" or platform == "linux2":
-        scan = os.popen("airodump-ng -d "+mac_addresses[0]+":00:00:00 -m FF:FF:FF:00:00:00 wlan0").read()
-    elif platform == "darwin":
-        # command to get APs for OS X
-        pass
-    elif platform == "win32":
+    # if platform == "linux" or platform == "linux2":
+    #     scan = os.popen("airodump-ng -d "+mac_addresses[0]+":00:00:00 -m FF:FF:FF:00:00:00 wlan0").read()
+    # elif platform == "darwin":
+    #     # command to get APs for OS X
+    #     pass
+    # elif platform == "win32":
         #scan = os.popen("netsh wlan show network mode=bssid | findstr \"42:07:26 Signal\"").read()
-        scan = os.popen("netsh wlan show network mode=bssid | findstr \""+mac_addresses[0]+" Signal\"").read()
-        if 'BSSID' in scan:
-            pos = scan.find('BSSID')
-            quality = scan[pos:].split('Signal')
-            quality = quality[1].split(':')
-            quality = quality[1].split('%')
-            dBm = (int(quality[0]) / 2) - 100
-            found = True
-        else:
-            found = False
+    scan = os.popen("netsh wlan show network mode=bssid | findstr \""+mac_addresses[0]+" Signal\"").read()
+    if 'BSSID' in scan:
+        pos = scan.find('BSSID')
+        quality = scan[pos:].split('Signal')
+        quality = quality[1].split(':')
+        quality = quality[1].split('%')
+        dBm = (int(quality[0]) / 2) - 100
+        found = True
+    else:
+        found = False
 
     if (found == True):
         distance = get_distance(dBm)
         messagebox.showinfo( "Drone detected", "Drone detected in "+str(distance)+" meters")
-
 
 def get_distance(signal):
     #calculate distance (m)
@@ -57,13 +56,17 @@ def deauth():
     #aireplay-ng --deauth 0 -a <mac address of AP> -c <mac address of client/victim> mon0
     pass
 
-top = Tk()
-top.geometry("200x200")
 
-gmap = gmplot.GoogleMapPlotter(37.428, -122.145, 16)
-gmap.draw("mymap.html")
+app = Tk()
+app.eval('tk::PlaceWindow %s center' % app.winfo_pathname(app.winfo_id()))
+app.geometry("400x400")
 
-button = Button(top, text ="Start scanning", command = scanDrones)
+
+# gmap = gmplot.GoogleMapPlotter(37.428, -122.145, 16)
+# gmap.draw("mymap.html")
+
+button = Button(app, text ="Start scanning", command = scanDrones)
 button.pack(side=TOP)
 
-top.mainloop()
+app.mainloop()
+
