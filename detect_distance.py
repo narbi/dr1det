@@ -12,7 +12,8 @@ from sys import platform
 import os
 import gmplot
 
-def scanDrones():
+def scanDrones(f2):
+    raise_frame(f2)
     # 60:60:1F = DJI Phanton
     # 90:03:B7, A0:14:3D, 00:12:1C, 00:26:7E = Parrot
     mac_addresses = ["60:60:1F", "90:03:B7", "A0:14:3D", "00:12:1C", "00:26:7E"]
@@ -23,8 +24,8 @@ def scanDrones():
     #     # command to get APs for OS X
     #     pass
     # elif platform == "win32":
-        #scan = os.popen("netsh wlan show network mode=bssid | findstr \"42:07:26 Signal\"").read()
-    scan = os.popen("netsh wlan show network mode=bssid | findstr \""+mac_addresses[0]+" Signal\"").read()
+    scan = os.popen("netsh wlan show network mode=bssid | findstr \"42:07:26 Signal\"").read()
+    # scan = os.popen("netsh wlan show network mode=bssid | findstr \""+mac_addresses[0]+" Signal\"").read()
     if 'BSSID' in scan:
         pos = scan.find('BSSID')
         quality = scan[pos:].split('Signal')
@@ -37,7 +38,10 @@ def scanDrones():
 
     if (found == True):
         distance = get_distance(dBm)
-        messagebox.showinfo( "Drone detected", "Drone detected in "+str(distance)+" meters")
+        # messagebox.showinfo( "Drone detected", "Drone detected in "+str(distance)+" meters")
+        Label(f2, text='Drone detected in '+str(distance)+' meters').pack()
+        Button(f2, text='Scan again', command=lambda:raise_frame(f1)).pack()
+
 
 def get_distance(signal):
     #calculate distance (m)
@@ -56,17 +60,23 @@ def deauth():
     #aireplay-ng --deauth 0 -a <mac address of AP> -c <mac address of client/victim> mon0
     pass
 
+def raise_frame(frame):
+    frame.tkraise()
 
-app = Tk()
-app.eval('tk::PlaceWindow %s center' % app.winfo_pathname(app.winfo_id()))
-app.geometry("400x400")
+root = Tk()
 
+f1 = Frame(root)
+f2 = Frame(root)
+f3 = Frame(root)
+f4 = Frame(root)
 
-# gmap = gmplot.GoogleMapPlotter(37.428, -122.145, 16)
-# gmap.draw("mymap.html")
+for frame in (f1, f2, f3, f4):
+    frame.grid(row=0, column=0, sticky='news')
 
-button = Button(app, text ="Start scanning", command = scanDrones)
-button.pack(side=TOP)
+Button(f1, text='Start scanning', command=lambda:scanDrones(f2)).pack()
+map_img = ImageTk.PhotoImage(Image.open("drone_map_demo.png"))
+panel = Label(f1, image = map_img)
+panel.pack(side = "bottom", fill = "both", expand = "yes")
+raise_frame(f1)
 
-app.mainloop()
-
+root.mainloop()
