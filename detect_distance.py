@@ -1,4 +1,5 @@
 #!/usr/bin/python
+
 from tkinter import *
 from tkinter import messagebox
 from tkinter import PhotoImage
@@ -24,22 +25,29 @@ def scanDrones(f2):
     #     # command to get APs for OS X
     #     pass
     # elif platform == "win32":
-    scan = os.popen("netsh wlan show network mode=bssid | findstr \"42:07:26 Signal\"").read()
-    # scan = os.popen("netsh wlan show network mode=bssid | findstr \""+mac_addresses[0]+" Signal\"").read()
-    if 'BSSID' in scan:
-        pos = scan.find('BSSID')
-        quality = scan[pos:].split('Signal')
-        quality = quality[1].split(':')
-        quality = quality[1].split('%')
-        dBm = (int(quality[0]) / 2) - 100
-        found = True
-    else:
-        found = False
+
+    for i in range (len(mac_addresses)):
+        #scan = os.popen("netsh wlan show network mode=bssid | findstr \"00:1d:aa Signal\"").read()
+        scan = os.popen("netsh wlan show network mode=bssid | findstr \""+mac_addresses[i]+" Signal\"").read()
+        if 'BSSID' in scan:
+            pos = scan.find('BSSID')
+            quality = scan[pos:].split('Signal')
+            quality = quality[1].split(':')
+            quality = quality[1].split('%')
+            dBm = (int(quality[0]) / 2) - 100
+            found = True
+            break
+        else:
+            found = False
 
     if (found == True):
         distance = get_distance(dBm)
+        if distance <= 250 :
+            zone = "A"
+        else:
+            zone = "B"
         # messagebox.showinfo( "Drone detected", "Drone detected in "+str(distance)+" meters")
-        Label(f2, text='Drone detected in '+str(distance)+' meters').pack()
+        Label(f2, text='\n\n\nDrone detected in '+str(distance)+' meters (zone '+zone+') ').pack()
         Button(f2, text='Scan again', command=lambda:raise_frame(f1)).pack()
 
 
@@ -64,7 +72,7 @@ def raise_frame(frame):
     frame.tkraise()
 
 root = Tk()
-
+root.title("ENISA - prototype drone radar")
 f1 = Frame(root)
 f2 = Frame(root)
 f3 = Frame(root)
@@ -73,10 +81,13 @@ f4 = Frame(root)
 for frame in (f1, f2, f3, f4):
     frame.grid(row=0, column=0, sticky='news')
 
+
 Button(f1, text='Start scanning', command=lambda:scanDrones(f2)).pack()
 map_img = ImageTk.PhotoImage(Image.open("drone_map_demo.png"))
 panel = Label(f1, image = map_img)
 panel.pack(side = "bottom", fill = "both", expand = "yes")
 raise_frame(f1)
+
+
 
 root.mainloop()
