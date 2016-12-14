@@ -14,6 +14,7 @@ import os
 import gmplot
 
 def scanDrones(f2):
+    global drone_img
     raise_frame(f2)
     # 60:60:1F = DJI Phanton
     # 90:03:B7, A0:14:3D, 00:12:1C, 00:26:7E = Parrot
@@ -27,7 +28,7 @@ def scanDrones(f2):
     # elif platform == "win32":
 
     for i in range (len(mac_addresses)):
-        #scan = os.popen("netsh wlan show network mode=bssid | findstr \"00:1d:aa Signal\"").read()
+        # scan = os.popen("netsh wlan show network mode=bssid | findstr \"dc:0b:1a Signal\"").read()
         scan = os.popen("netsh wlan show network mode=bssid | findstr \""+mac_addresses[i]+" Signal\"").read()
         if 'BSSID' in scan:
             pos = scan.find('BSSID')
@@ -42,12 +43,17 @@ def scanDrones(f2):
 
     if (found == True):
         distance = get_distance(dBm)
-        if distance <= 250 :
-            zone = "A"
-        else:
-            zone = "B"
         # messagebox.showinfo( "Drone detected", "Drone detected in "+str(distance)+" meters")
-        Label(f2, text='\n\n\nDrone detected in '+str(distance)+' meters (zone '+zone+') ').pack()
+        if (i==0):
+            drone = "dji_phantom.png"
+        else:
+            drone = "parrot.png"
+        Label(f2, text='\n\n\n ALERT\n\n\nDrone detected in approximately '+str(distance)+' meters  ').pack()
+        drone_img = ImageTk.PhotoImage(Image.open(drone))
+        Label(f2, image = drone_img).pack(side = "bottom", fill = "both", expand = "yes")
+        Button(f2, text='Scan again', command=lambda:raise_frame(f1)).pack()
+    else:
+        Label(f2, text='\n\n\n NO DRONE IN THE AREA').pack()
         Button(f2, text='Scan again', command=lambda:raise_frame(f1)).pack()
 
 
@@ -81,9 +87,8 @@ f4 = Frame(root)
 for frame in (f1, f2, f3, f4):
     frame.grid(row=0, column=0, sticky='news')
 
-
 Button(f1, text='Start scanning', command=lambda:scanDrones(f2)).pack()
-map_img = ImageTk.PhotoImage(Image.open("drone_map_demo.png"))
+map_img = ImageTk.PhotoImage(Image.open("drone_map_sat.png"))
 panel = Label(f1, image = map_img)
 panel.pack(side = "bottom", fill = "both", expand = "yes")
 raise_frame(f1)
