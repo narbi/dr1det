@@ -12,6 +12,7 @@ import base64
 from sys import platform
 import os
 import gmplot
+import datetime
 
 def scanDrones(f2):
     global drone_img
@@ -43,12 +44,13 @@ def scanDrones(f2):
 
     if (found == True):
         distance = get_distance(dBm)
+
         # messagebox.showinfo( "Drone detected", "Drone detected in "+str(distance)+" meters")
         if (i==0):
             drone = "dji_phantom.png"
         else:
             drone = "parrot.png"
-        Label(f2, text='\n\n\n ALERT\n\n\nDrone detected in approximately '+str(distance)+' meters  ').pack()
+        Label(f2, text='\n\n\n ALERT\n\n\nDrone detected in approximately '+str(distance)+' meters \n{:%Y-%b-%d %H:%M:%S}'.format(datetime.datetime.now())).pack()
         drone_img = ImageTk.PhotoImage(Image.open(drone))
         Label(f2, image = drone_img).pack(side = "bottom", fill = "both", expand = "yes")
         Button(f2, text='Scan again', command=lambda:raise_frame(f1)).pack()
