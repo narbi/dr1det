@@ -5,4 +5,4 @@ class DetectingDrones(App):
   pass
   
 if __name__ == "__main__":
-  DetectingDrones(App).run()
+  DetectingDrones().run()
