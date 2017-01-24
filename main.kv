@@ -1,0 +1,51 @@
+<ScreenOne>:
+
+    BoxLayout:
+        orientation: "vertical"
+        size: root.size
+        spacing: 20
+        padding: 20
+
+        MapView:
+            zoom: 15
+            lat: 50.6394
+            lon: 3.057
+
+        Button:
+            text: "Scan Drones"
+            on_release:
+                root.manager.current = "screen2"
+                # reset health_points
+                root.manager.ids.screen_two.health_points = 100
+
+<ScreenTwo>:
+
+    BoxLayout:
+        orientation: "vertical"
+        size: root.size
+        spacing: 20
+        padding: 20
+
+        Image:
+            source: 'dji_phantom.png'
+
+        Button:
+            text: "Release"
+            on_release:
+                root.manager.current = "screen1"
+
+<Manager>:
+    id: screen_manager
+
+    screen_one: screen_one
+    screen_two: screen_two
+
+    ScreenOne:
+        id: screen_one
+        name: "screen1"
+        manager: screen_manager
+
+    ScreenTwo:
+        id: screen_two
+        name: "screen2"
+        manager: screen_manager
