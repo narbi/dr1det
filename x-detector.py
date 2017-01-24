@@ -7,6 +7,9 @@ from kivy.uix.screenmanager import ScreenManager, Screen, NoTransition
 from kivy.properties import ObjectProperty, NumericProperty
 
 class ScreenTwo(Screen):
+  # alert and play sound
+  # log timestap and drone brand - append in log file
+  # time.sleep(3) until it returns back to the main screen
   pass
 
 class ScreenOne(Screen):
