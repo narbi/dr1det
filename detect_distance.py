@@ -13,13 +13,14 @@ from sys import platform
 import os
 import gmplot
 import datetime
+import time
 
 def scanDrones(f2):
     global drone_img
     raise_frame(f2)
-    # 60:60:1F = DJI Phanton
+    # 60:60:1f = DJI Phantom
     # 90:03:B7, A0:14:3D, 00:12:1C, 00:26:7E = Parrot
-    mac_addresses = ["60:60:1F", "90:03:B7", "A0:14:3D", "00:12:1C", "00:26:7E"]
+    mac_addresses = ["60:60:1F","60:60:1f", "90:03:B7", "A0:14:3D", "00:12:1C", "00:26:7E"]
     # check for cross platform functionality
     # if platform == "linux" or platform == "linux2":
     #     scan = os.popen("airodump-ng -d "+mac_addresses[0]+":00:00:00 -m FF:FF:FF:00:00:00 wlan0").read()
@@ -29,8 +30,11 @@ def scanDrones(f2):
     # elif platform == "win32":
 
     for i in range (len(mac_addresses)):
-        # scan = os.popen("netsh wlan show network mode=bssid | findstr \"dc:0b:1a Signal\"").read()
+        #scan = os.popen("netsh wlan show network mode=bssid | findstr \"0a:27:22 Signal\"").read()
+        os.popen("netsh wlan disconnect")
+        time.sleep(2)
         scan = os.popen("netsh wlan show network mode=bssid | findstr \""+mac_addresses[i]+" Signal\"").read()
+
         if 'BSSID' in scan:
             pos = scan.find('BSSID')
             quality = scan[pos:].split('Signal')
@@ -44,16 +48,20 @@ def scanDrones(f2):
 
     if (found == True):
         distance = get_distance(dBm)
-
+        distance=round(distance,2)
         # messagebox.showinfo( "Drone detected", "Drone detected in "+str(distance)+" meters")
-        if (i==0):
+        if (i==0 or i==1):
             drone = "dji_phantom.png"
         else:
             drone = "parrot.png"
-        Label(f2, text='\n\n\n ALERT\n\n\nDrone detected in approximately '+str(distance)+' meters \n{:%Y-%b-%d %H:%M:%S}'.format(datetime.datetime.now())).pack()
+        Label(f2, text='\n\n ALERT \n ', fg="red",font = "Verdana 10 bold").pack()
+        Label(f2, text='\n DRONE dji phantom 3 detected in approximately '+str(distance)+' meters \n\n{:%Y-%b-%d %H:%M:%S}'.format(datetime.datetime.now()),font = "Verdana 10 bold").pack()
         drone_img = ImageTk.PhotoImage(Image.open(drone))
         Label(f2, image = drone_img).pack(side = "bottom", fill = "both", expand = "yes")
-        Button(f2, text='Scan again', command=lambda:raise_frame(f1)).pack()
+        # Button(f2, text='Scan again', command=lambda:raise_frame(f1)).pack()
+        text_file = open("logs.txt", "a")
+        text_file.write("\n "+str(datetime.datetime.now())+" Drone detected in approximately "+str(distance)+"meters.")
+        text_file.close()
     else:
         Label(f2, text='\n\n\n NO DRONE IN THE AREA').pack()
         Button(f2, text='Scan again', command=lambda:raise_frame(f1)).pack()
