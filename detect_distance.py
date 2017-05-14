@@ -15,6 +15,17 @@ import gmplot
 import datetime
 import time
 
+def raise_frame(frame):
+    frame.tkraise()
+
+def first_window(f1):
+    Button(f1, text='Start scanning', command=lambda:scanDrones(f2)).pack()
+    global map_img
+    map = "drone_map_sat.png"
+    map_img = ImageTk.PhotoImage(Image.open(map))
+    Label(f1, image = map_img).pack(side = "bottom", fill = "both", expand = "yes")
+    raise_frame(f1)
+
 def scanDrones(f2):
     global drone_img
     raise_frame(f2)
@@ -63,8 +74,15 @@ def scanDrones(f2):
         text_file.write("\n "+str(datetime.datetime.now())+" Drone detected in approximately "+str(distance)+"meters.")
         text_file.close()
     else:
-        Label(f2, text='\n\n\n NO DRONE IN THE AREA').pack()
-        Button(f2, text='Scan again', command=lambda:raise_frame(f1)).pack()
+        # Label(f2, text='\n\n\n NO DRONE IN THE AREA').pack()
+        # Button(f2, text='Scan again', command=lambda:raise_frame(f1)).pack()
+        no_drone(f3)
+
+def no_drone(f3):
+    # clear widgets in next frame
+    for widget in f1.winfo_children():
+        widget.destroy()
+    first_window(f1)
 
 
 def get_distance(signal):
@@ -84,11 +102,9 @@ def deauth():
     #aireplay-ng --deauth 0 -a <mac address of AP> -c <mac address of client/victim> mon0
     pass
 
-def raise_frame(frame):
-    frame.tkraise()
 
 root = Tk()
-root.title("ENISA - prototype drone radar")
+root.title("ENISA - Drone Detector")
 f1 = Frame(root)
 f2 = Frame(root)
 f3 = Frame(root)
@@ -97,12 +113,6 @@ f4 = Frame(root)
 for frame in (f1, f2, f3, f4):
     frame.grid(row=0, column=0, sticky='news')
 
-Button(f1, text='Start scanning', command=lambda:scanDrones(f2)).pack()
-map_img = ImageTk.PhotoImage(Image.open("drone_map_sat.png"))
-panel = Label(f1, image = map_img)
-panel.pack(side = "bottom", fill = "both", expand = "yes")
-raise_frame(f1)
-
-
+first_window(f1)
 
 root.mainloop()
