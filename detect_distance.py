@@ -27,11 +27,16 @@ def first_window(f1):
     raise_frame(f1)
 
 def scanDrones(f2):
-    global drone_img
+    # https://www.adminsub.net/mac-address-finder
+    # http://standards-oui.ieee.org/oui/oui.txt
     raise_frame(f2)
-    # 60:60:1f = DJI Phantom
-    # 90:03:B7, A0:14:3D, 00:12:1C, 00:26:7E = Parrot
-    mac_addresses = ["60:60:1F","60:60:1f", "90:03:B7", "A0:14:3D", "00:12:1C", "00:26:7E"]
+    # 60:60:1f = DJI
+    # A0:14:3D, 90:3A:E6, 90:03:B7, 00:26:7E, 00:12:1C = Parrot
+    # E0B6F58 = YUNEEC
+    # 3C6716 = Lily robotics
+    # F4DD9E, D89685, D4D919, 044169 = GoPro
+    #
+    mac_addresses = ["60:60:1F","60:60:1f", "90:03:B7", "A0:14:3D", "00:12:1C", "00:26:7E", "E0B6F58"]
     # check for cross platform functionality
     # if platform == "linux" or platform == "linux2":
     #     scan = os.popen("airodump-ng -d "+mac_addresses[0]+":00:00:00 -m FF:FF:FF:00:00:00 wlan0").read()
