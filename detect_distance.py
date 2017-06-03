@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 from tkinter import *
+from winsound import *
 from tkinter import messagebox
 from tkinter import PhotoImage
 from PIL import Image,ImageTk
@@ -19,12 +20,13 @@ def raise_frame(frame):
     frame.tkraise()
 
 def first_window(f1):
-    Button(f1, text='Start scanning', command=lambda:scanDrones(f2)).pack()
+    # Button(f1, text='Start scanning', command=lambda:scanDrones(f2)).pack()
     global map_img
     map = "drone_map_sat.png"
     map_img = ImageTk.PhotoImage(Image.open(map))
     Label(f1, image = map_img).pack(side = "bottom", fill = "both", expand = "yes")
     raise_frame(f1)
+    f1.after(4000,scanDrones, f2)
 
 def scanDrones(f2):
     raise_frame(f2)
@@ -40,7 +42,7 @@ def scanDrones(f2):
     # elif platform == "win32":
 
     os.popen("netsh wlan disconnect")
-    #time.sleep(2)
+    time.sleep(2)
 
     for key in mac_address:
         for item in mac_address[key]:
@@ -53,11 +55,11 @@ def scanDrones(f2):
                 quality = quality[1].split(':')
                 quality = quality[1].split('%')
                 dBm = (int(quality[0]) / 2) - 100
-                show_alert(key,item,dBm)
+                show_alert(key,dBm)
 
-    # no_drone(f3)
+    f2.after(5000, no_drone,f3)
 
-def show_alert(drone,mac,dBm):
+def show_alert(drone,dBm):
     global drone_img
     distance = get_distance(dBm)
     distance=round(distance,2)
