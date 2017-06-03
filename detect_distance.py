@@ -56,8 +56,10 @@ def scanDrones(f2):
                 quality = quality[1].split('%')
                 dBm = (int(quality[0]) / 2) - 100
                 show_alert(key,dBm)
+                return
 
-    f2.after(5000, no_drone,f3)
+
+
 
 def show_alert(drone,dBm):
     global drone_img
@@ -72,8 +74,9 @@ def show_alert(drone,dBm):
     Label(f2, text='\n DRONE '+drone+' detected in approximately '+str(distance)+' meters \n\n{:%Y-%b-%d %H:%M:%S}'.format(datetime.datetime.now()),font = "Verdana 10 bold").pack()
     drone_img = ImageTk.PhotoImage(Image.open(drone+".png"))
     Label(f2, image = drone_img).pack(side = "bottom", fill = "both", expand = "yes")
-    # Button(f2, text='Scan again', command=lambda:raise_frame(f1)).pack()
-
+    play_sound()
+    f2.after(5000, no_drone,f3)
+    return
 
 def no_drone(f3):
     # clear widgets in next frame
@@ -81,6 +84,8 @@ def no_drone(f3):
         widget.destroy()
     first_window(f1)
 
+def play_sound():
+    return PlaySound("alert.wav", SND_FILENAME)
 
 def get_distance(signal):
     #calculate distance (m)
