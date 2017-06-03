@@ -1,26 +1,9 @@
 #!/usr/bin/python
 
-from tkinter import *
-from winsound import *
-from tkinter import messagebox
-from tkinter import PhotoImage
-from PIL import Image,ImageTk
-import googlemaps
-import urllib
-import urllib.request
-import math
-import base64
-from sys import platform
-import os
-import gmplot
-import datetime
-import time
-
 def raise_frame(frame):
     frame.tkraise()
 
 def first_window(f1):
-    # Button(f1, text='Start scanning', command=lambda:scanDrones(f2)).pack()
     global map_img
     map = "drone_map_sat.png"
     map_img = ImageTk.PhotoImage(Image.open(map))
@@ -34,15 +17,18 @@ def scanDrones(f2):
     mac_address ={"DJI": ["60:60:1F", "1A:D6:C7"], "Parrot": ["A0:14:3D", "90:3A:E6", "90:03:B7", "00:26:7E", "00:12:1C"], "Lily": ["3C:67:16"], "GoPro": ["F4:DD:9E", "D8:96:85", "D4:D9:19", "04:41:69"]}
 
     # check for cross platform functionality
-    # if platform == "linux" or platform == "linux2":
-    #     scan = os.popen("airodump-ng -d "+mac_addresses[0]+":00:00:00 -m FF:FF:FF:00:00:00 wlan0").read()
-    # elif platform == "darwin":
-    #     # command to get APs for OS X
-    #     pass
-    # elif platform == "win32":
+    if platform == "linux" or platform == "linux2":
+        scan_cmd_linux(mac_address)
+    elif platform == "darwin":
+        # command to get APs for OS X - not available yet
+        pass
+    elif platform == "win32":
+        scan_cmd_windows(mac_address)
+    return
 
+def scan_cmd_windows(mac_address):
     os.popen("netsh wlan disconnect")
-    time.sleep(2)
+    time.sleep(1)
 
     for key in mac_address:
         for item in mac_address[key]:
@@ -58,8 +44,14 @@ def scanDrones(f2):
                 show_alert(key,dBm)
                 return
 
-
-
+def scan_cmd_linux(mac_address):
+    for key in mac_address:
+        for item in mac_address[key]:
+            print(item)
+            # scan = os.popen("sudo iwlist wlan0 scan")
+            # scan = os.popen("airodump-ng -d "+item.lower()+":00:00:00 -m FF:FF:FF:00:00:00 wlan0").read()
+            # more commands to filter results from scan
+    return
 
 def show_alert(drone,dBm):
     global drone_img
@@ -104,17 +96,26 @@ def deauth():
     #aireplay-ng --deauth 0 -a <mac address of AP> -c <mac address of client/victim> mon0
     pass
 
+if __name__ == "__main__":
+    from tkinter import *
+    from winsound import *
+    from PIL import Image,ImageTk
+    import math
+    from sys import platform
+    import os
+    import datetime
+    import time
 
-root = Tk()
-root.title("ENISA - Drone Detector")
-f1 = Frame(root)
-f2 = Frame(root)
-f3 = Frame(root)
-f4 = Frame(root)
+    root = Tk()
+    root.title("ENISA - Drone Detector")
+    f1 = Frame(root)
+    f2 = Frame(root)
+    f3 = Frame(root)
+    f4 = Frame(root)
 
-for frame in (f1, f2, f3, f4):
-    frame.grid(row=0, column=0, sticky='news')
+    for frame in (f1, f2, f3, f4):
+        frame.grid(row=0, column=0, sticky='news')
 
-first_window(f1)
+    first_window(f1)
 
-root.mainloop()
+    root.mainloop()
