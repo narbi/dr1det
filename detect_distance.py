@@ -27,16 +27,10 @@ def first_window(f1):
     raise_frame(f1)
 
 def scanDrones(f2):
-    # https://www.adminsub.net/mac-address-finder
-    # http://standards-oui.ieee.org/oui/oui.txt
     raise_frame(f2)
-    # 60:60:1f = DJI
-    # A0:14:3D, 90:3A:E6, 90:03:B7, 00:26:7E, 00:12:1C = Parrot
-    # E0B6F58 = YUNEEC
-    # 3C6716 = Lily robotics
-    # F4DD9E, D89685, D4D919, 044169 = GoPro
-    #
-    mac_addresses = ["60:60:1F","60:60:1f", "90:03:B7", "A0:14:3D", "00:12:1C", "00:26:7E", "E0B6F58"]
+    #"1A:D6:C7" is for TESTING ONLY
+    mac_address ={"DJI": ["60:60:1F", "1A:D6:C7"], "Parrot": ["A0:14:3D", "90:3A:E6", "90:03:B7", "00:26:7E", "00:12:1C"], "Lily": ["3C:67:16"], "GoPro": ["F4:DD:9E", "D8:96:85", "D4:D9:19", "04:41:69"]}
+
     # check for cross platform functionality
     # if platform == "linux" or platform == "linux2":
     #     scan = os.popen("airodump-ng -d "+mac_addresses[0]+":00:00:00 -m FF:FF:FF:00:00:00 wlan0").read()
@@ -45,43 +39,39 @@ def scanDrones(f2):
     #     pass
     # elif platform == "win32":
 
-    for i in range (len(mac_addresses)):
-        #scan = os.popen("netsh wlan show network mode=bssid | findstr \"0a:27:22 Signal\"").read()
-        os.popen("netsh wlan disconnect")
-        time.sleep(2)
-        scan = os.popen("netsh wlan show network mode=bssid | findstr \""+mac_addresses[i]+" Signal\"").read()
+    os.popen("netsh wlan disconnect")
+    #time.sleep(2)
 
-        if 'BSSID' in scan:
-            pos = scan.find('BSSID')
-            quality = scan[pos:].split('Signal')
-            quality = quality[1].split(':')
-            quality = quality[1].split('%')
-            dBm = (int(quality[0]) / 2) - 100
-            found = True
-            break
-        else:
-            found = False
+    for key in mac_address:
+        for item in mac_address[key]:
+            print(item)
+            scan = os.popen('netsh wlan show network mode=bssid | findstr \"'+item.lower()+' Signal\"').read()
+            if 'BSSID' in scan:
+                print("scanning for "+item)
+                pos = scan.find('BSSID')
+                quality = scan[pos:].split('Signal')
+                quality = quality[1].split(':')
+                quality = quality[1].split('%')
+                dBm = (int(quality[0]) / 2) - 100
+                show_alert(key,item,dBm)
 
-    if (found == True):
-        distance = get_distance(dBm)
-        distance=round(distance,2)
-        # messagebox.showinfo( "Drone detected", "Drone detected in "+str(distance)+" meters")
-        if (i==0 or i==1):
-            drone = "dji_phantom.png"
-        else:
-            drone = "parrot.png"
-        Label(f2, text='\n\n ALERT \n ', fg="red",font = "Verdana 10 bold").pack()
-        Label(f2, text='\n DRONE dji phantom 3 detected in approximately '+str(distance)+' meters \n\n{:%Y-%b-%d %H:%M:%S}'.format(datetime.datetime.now()),font = "Verdana 10 bold").pack()
-        drone_img = ImageTk.PhotoImage(Image.open(drone))
-        Label(f2, image = drone_img).pack(side = "bottom", fill = "both", expand = "yes")
-        # Button(f2, text='Scan again', command=lambda:raise_frame(f1)).pack()
-        text_file = open("logs.txt", "a")
-        text_file.write("\n "+str(datetime.datetime.now())+" Drone detected in approximately "+str(distance)+"meters.")
-        text_file.close()
-    else:
-        # Label(f2, text='\n\n\n NO DRONE IN THE AREA').pack()
-        # Button(f2, text='Scan again', command=lambda:raise_frame(f1)).pack()
-        no_drone(f3)
+    # no_drone(f3)
+
+def show_alert(drone,mac,dBm):
+    global drone_img
+    distance = get_distance(dBm)
+    distance=round(distance,2)
+
+    text_file = open("logs.txt", "a")
+    text_file.write("\n "+str(datetime.datetime.now())+" Drone detected in approximately "+str(distance)+"meters.")
+    text_file.close()
+
+    Label(f2, text='\n\n ALERT \n ', fg="red",font = "Verdana 10 bold").pack()
+    Label(f2, text='\n DRONE '+drone+' detected in approximately '+str(distance)+' meters \n\n{:%Y-%b-%d %H:%M:%S}'.format(datetime.datetime.now()),font = "Verdana 10 bold").pack()
+    drone_img = ImageTk.PhotoImage(Image.open(drone+".png"))
+    Label(f2, image = drone_img).pack(side = "bottom", fill = "both", expand = "yes")
+    # Button(f2, text='Scan again', command=lambda:raise_frame(f1)).pack()
+
 
 def no_drone(f3):
     # clear widgets in next frame
@@ -92,7 +82,7 @@ def no_drone(f3):
 
 def get_distance(signal):
     #calculate distance (m)
-    frequency = 2412 #dummy set of frequency (MHz)
+    frequency = 2412 #frequency (MHz)
     exp = (27.55 - (20 * math.log10(frequency)) + abs(signal)) / 20.0;
     distance = math.pow(10,exp)
     return distance
