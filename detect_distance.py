@@ -3,13 +3,19 @@
 def raise_frame(frame):
     frame.tkraise()
 
+def destroy_widgets(frame):
+    # clear widgets in next frame
+    for widget in frame.winfo_children():
+        widget.destroy()
+
 def first_window(f1):
     global map_img
     map = "drone_map_sat.png"
     map_img = ImageTk.PhotoImage(Image.open(map))
     Label(f1, image = map_img).pack(side = "bottom", fill = "both", expand = "yes")
     raise_frame(f1)
-    f1.after(4000,scanDrones, f2)
+    destroy_widgets(f2)
+    f1.after(5000,scanDrones, f2)
 
 def scanDrones(f2):
     raise_frame(f2)
@@ -67,13 +73,11 @@ def show_alert(drone,dBm):
     drone_img = ImageTk.PhotoImage(Image.open(drone+".png"))
     Label(f2, image = drone_img).pack(side = "bottom", fill = "both", expand = "yes")
     play_sound()
-    f2.after(5000, no_drone,f3)
+    f2.after(7000, no_drone,f3)
     return
 
 def no_drone(f3):
-    # clear widgets in next frame
-    for widget in f1.winfo_children():
-        widget.destroy()
+    destroy_widgets(f1)
     first_window(f1)
 
 def play_sound():
