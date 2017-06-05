@@ -9,16 +9,16 @@ def destroy_widgets(frame):
         widget.destroy()
 
 def first_window(f1):
-    gif = AnimatedGIF(f1, "e3c2dfab3ec1856fd36f2ee4afcadf6e.gif")
-    gif.pack(side = "bottom", fill = "both", expand = "yes")
+    gif = AnimatedGIF(f1, "radar_.gif")
+    gif.pack(side = "top", fill = "both", expand = "true", padx = 100, pady = 150)
     raise_frame(f1)
     destroy_widgets(f2)
-    f1.after(5000,scanDrones, f2)
+    f1.after(6250,scanDrones, f2)
 
 def scanDrones(f2):
     raise_frame(f2)
     #"1A:D6:C7" is for TESTING ONLY
-    mac_address ={"DJI": ["60:60:1F", "1A:D6:C7"], "Parrot": ["A0:14:3D", "90:3A:E6", "90:03:B7", "00:26:7E", "00:12:1C"], "Lily": ["3C:67:16"], "GoPro": ["F4:DD:9E", "D8:96:85", "D4:D9:19", "04:41:69"]}
+    mac_address ={"DJI": ["60:60:1F", "1A:D6:C8"], "Parrot": ["A0:14:3D", "90:3A:E6", "90:03:B7", "00:26:7E", "00:12:1C"], "Lily": ["3C:67:16"], "GoPro": ["F4:DD:9E", "D8:96:85", "D4:D9:19", "04:41:69"]}
 
     # check for cross platform functionality
     if platform == "linux" or platform == "linux2":
@@ -32,7 +32,7 @@ def scanDrones(f2):
 
 def scan_cmd_windows(mac_address):
     os.popen("netsh wlan disconnect")
-    time.sleep(1)
+    # time.sleep(1)
 
     for key in mac_address:
         for item in mac_address[key]:
@@ -47,6 +47,8 @@ def scan_cmd_windows(mac_address):
                 dBm = (int(quality[0]) / 2) - 100
                 show_alert(key,dBm)
                 return
+    first_window(f1)
+    return
 
 def scan_cmd_linux(mac_address):
     for key in mac_address:
@@ -71,7 +73,7 @@ def show_alert(drone,dBm):
     drone_img = ImageTk.PhotoImage(Image.open(drone+".png"))
     Label(f2, image = drone_img).pack(side = "bottom", fill = "both", expand = "yes")
     play_sound()
-    f2.after(7000, no_drone,f3)
+    f2.after(7000, first_window,f1)
     return
 
 def no_drone(f3):
@@ -213,6 +215,7 @@ if __name__ == "__main__":
 
     root = Tk()
     root.title("ENISA - Drone Detector")
+    root.minsize(width=500,height=950)
     f1 = Frame(root)
     f2 = Frame(root)
     f3 = Frame(root)
@@ -220,6 +223,7 @@ if __name__ == "__main__":
 
     for frame in (f1, f2, f3, f4):
         frame.grid(row=0, column=0, sticky='news')
+
 
     first_window(f1)
 
