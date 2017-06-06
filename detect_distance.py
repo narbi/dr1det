@@ -18,7 +18,7 @@ def first_window(f1):
 def scanDrones(f2):
     raise_frame(f2)
     #"1A:D6:C7" is for TESTING ONLY
-    mac_address ={"DJI": ["60:60:1F", "1A:D6:C8"], "Parrot": ["A0:14:3D", "90:3A:E6", "90:03:B7", "00:26:7E", "00:12:1C"], "Lily": ["3C:67:16"], "GoPro": ["F4:DD:9E", "D8:96:85", "D4:D9:19", "04:41:69"]}
+    mac_address ={"DJI": ["60:60:1F", "1A:D6:C7"], "Parrot": ["A0:14:3D", "90:3A:E6", "90:03:B7", "00:26:7E", "00:12:1C"], "Lily": ["3C:67:16"], "GoPro": ["F4:DD:9E", "D8:96:85", "D4:D9:19", "04:41:69"]}
 
     # check for cross platform functionality
     if platform == "linux" or platform == "linux2":
@@ -33,19 +33,29 @@ def scanDrones(f2):
 def scan_cmd_windows(mac_address):
     os.popen("netsh wlan disconnect")
     # time.sleep(1)
-
+    scan_to_file()
+    time.sleep(0.2)
     for key in mac_address:
-        for item in mac_address[key]:
-            print(item)
-            scan = os.popen('netsh wlan show network mode=bssid | findstr \"'+item.lower()+' Signal\"').read()
-            if 'BSSID' in scan:
-                print("scanning for "+item)
-                pos = scan.find('BSSID')
-                quality = scan[pos:].split('Signal')
-                quality = quality[1].split(':')
+        for lookup in mac_address[key]:
+            print(lookup)
+
+            ssidLine=get_line_number(lookup.lower(),"scans.txt")
+            if (ssidLine>0):
+                # Search in specific line
+                ssid = linecache.getline('scans.txt', ssidLine-4)
+                mac = linecache.getline('scans.txt', ssidLine)
+                signal=linecache.getline('scans.txt', ssidLine+1)
+                channel=linecache.getline('scans.txt', ssidLine+3)
+                print(ssid,mac,signal,channel)
+
+                quality = signal.split(':')
                 quality = quality[1].split('%')
                 dBm = (int(quality[0]) / 2) - 100
-                show_alert(key,dBm)
+
+                mac = mac.split(':',1)
+                ssid = ssid.split(':')
+                channel = channel.split(':')
+                show_alert(key, dBm, mac[1].strip(), ssid[1].strip(), channel[1].strip())
                 return
     first_window(f1)
     return
@@ -59,13 +69,13 @@ def scan_cmd_linux(mac_address):
             # more commands to filter results from scan
     return
 
-def show_alert(drone,dBm):
+def show_alert(drone,dBm, mac, ssid, channel):
     global drone_img
     distance = get_distance(dBm)
     distance=round(distance,2)
 
     text_file = open("logs.txt", "a")
-    text_file.write("\n "+str(datetime.datetime.now())+" Drone detected in approximately "+str(distance)+"meters.")
+    text_file.write("\n"+str(datetime.datetime.now())+"\t"+mac+"\t"+ssid+"\t"+drone+" DRONE\t~"+str(distance)+"m.")
     text_file.close()
 
     Label(f2, text='\n\n ALERT \n ', fg="red",font = "Verdana 10 bold").pack()
@@ -99,6 +109,21 @@ def deauth():
     #iwconfig mon0 channel 11
     #aireplay-ng --deauth 0 -a <mac address of AP> -c <mac address of client/victim> mon0
     pass
+
+def get_line_number(phrase, file_name):
+    f=open(file_name, 'r')
+    for (i, line) in enumerate(f,1):
+        if phrase in line:
+            return i
+    return -1
+
+
+def scan_to_file():
+    outfile = open("scans.txt","w")
+    subprocess.Popen('netsh wlan show network mode=bssid',stdout=outfile)
+    outfile.close()
+    return
+
 
 from tkinter import PhotoImage
 from tkinter import Label
@@ -211,7 +236,10 @@ if __name__ == "__main__":
     from sys import platform
     import os
     import datetime
+    import subprocess
+    import linecache
     import time
+
 
     root = Tk()
     root.title("ENISA - Drone Detector")
