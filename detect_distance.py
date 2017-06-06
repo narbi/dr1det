@@ -81,9 +81,9 @@ def show_alert(drone,dBm, mac, ssid, channel):
     Label(f2, text='\n\n ALERT \n ', fg="red",font = "Verdana 10 bold").pack()
     Label(f2, text='\n DRONE '+drone+' detected in approximately '+str(distance)+' meters \n\n{:%Y-%b-%d %H:%M:%S}'.format(datetime.datetime.now()),font = "Verdana 10 bold").pack()
     drone_img = ImageTk.PhotoImage(Image.open(drone+".png"))
-    Label(f2, image = drone_img).pack(side = "bottom", fill = "both", expand = "yes")
+    Label(f2, image = drone_img).pack(side = "top", fill = "both", expand = "yes")
     play_sound()
-    f2.after(7000, first_window,f1)
+    f2.after(7000, no_drone,f3)
     return
 
 def no_drone(f3):
