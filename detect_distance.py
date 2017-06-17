@@ -61,12 +61,29 @@ def scan_cmd_windows(mac_address):
     return
 
 def scan_cmd_linux(mac_address):
+    scan = os.popen("sudo iwlist wlan0 scan > scans.txt")
+    time.sleep(0.5)
     for key in mac_address:
         for item in mac_address[key]:
             print(item)
-            # scan = os.popen("sudo iwlist wlan0 scan")
-            # scan = os.popen("airodump-ng -d "+item.lower()+":00:00:00 -m FF:FF:FF:00:00:00 wlan0").read()
-            # more commands to filter results from scan
+
+            ssidLine=get_line_number(item,"scans.txt")
+            if (ssidLine>0):
+                # Search in specific line
+
+                mac = linecache.getline('scans.txt', ssidLine)
+                channel=linecache.getline('scans.txt', ssidLine+1)
+                signal=linecache.getline('scans.txt', ssidLine+3)
+                ssid = linecache.getline('scans.txt', ssidLine+5)
+
+                dBm = signal.split('=',2)
+                dBm = dBm[2].split(' ')
+                mac = mac.split(':',1)
+                ssid = ssid.split(':')
+                channel = channel.split(':')
+                show_alert(key, dBm[0].strip(), mac[1].strip(), ssid[1].strip(), channel[1].strip())
+                return
+
     return
 
 def show_alert(drone,dBm, mac, ssid, channel):
