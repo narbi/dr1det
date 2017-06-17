@@ -18,7 +18,7 @@ def first_window(f1):
 def scanDrones(f2):
     raise_frame(f2)
     #"1A:D6:C7" is for TESTING ONLY
-    mac_address ={"DJI": ["60:60:1F", "1A:D6:C7"], "Parrot": ["A0:14:3D", "90:3A:E6", "90:03:B7", "00:26:7E", "00:12:1C"], "Lily": ["3C:67:16"], "GoPro": ["F4:DD:9E", "D8:96:85", "D4:D9:19", "04:41:69"]}
+    mac_address ={"DJI": ["60:60:1F"], "Parrot": ["A0:14:3D", "90:3A:E6", "90:03:B7", "00:26:7E", "00:12:1C"], "Lily": ["3C:67:16"], "GoPro": ["F4:DD:9E", "D8:96:85", "D4:D9:19", "04:41:69"]}
 
     # check for cross platform functionality
     if platform == "linux" or platform == "linux2":
@@ -46,7 +46,6 @@ def scan_cmd_windows(mac_address):
                 mac = linecache.getline('scans.txt', ssidLine)
                 signal=linecache.getline('scans.txt', ssidLine+1)
                 channel=linecache.getline('scans.txt', ssidLine+3)
-                print(ssid,mac,signal,channel)
 
                 quality = signal.split(':')
                 quality = quality[1].split('%')
@@ -84,7 +83,7 @@ def scan_cmd_linux(mac_address):
                 channel = channel.split(':')
                 show_alert(key, dBm[0].strip(), mac[1].strip(), ssid[1].strip(), channel[1].strip())
                 return
-
+    first_window(f1)
     return
 
 def show_alert(drone,dBm, mac, ssid, channel):
