@@ -80,6 +80,7 @@ def scan_cmd_linux(mac_address):
                 dBm = dBm[2].split(' ')
                 mac = mac.split(':',1)
                 ssid = ssid.split(':')
+                ssid.replace('\"','')
                 channel = channel.split(':')
                 show_alert(key, dBm[0].strip(), mac[1].strip(), ssid[1].strip(), channel[1].strip())
                 return
