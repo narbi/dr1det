@@ -32,13 +32,15 @@ def scanDrones(f2):
 
 def scan_cmd_windows(mac_address):
     os.popen("netsh wlan disconnect")
-    # time.sleep(1)
+    time.sleep(0.5)
     scan_to_file()
-    time.sleep(0.2)
+    time.sleep(0.5)
+
     for key in mac_address:
         for lookup in mac_address[key]:
             print(lookup)
-
+            linecache.clearcache()
+            linecache.checkcache(filename="scans.txt")
             ssidLine=get_line_number(lookup.lower(),"scans.txt")
             if (ssidLine>0):
                 # Search in specific line
@@ -46,7 +48,7 @@ def scan_cmd_windows(mac_address):
                 mac = linecache.getline('scans.txt', ssidLine)
                 signal=linecache.getline('scans.txt', ssidLine+1)
                 channel=linecache.getline('scans.txt', ssidLine+3)
-
+                linecache.clearcache()
                 quality = signal.split(':')
                 quality = quality[1].split('%')
                 dBm = (int(quality[0]) / 2) - 100
@@ -56,7 +58,7 @@ def scan_cmd_windows(mac_address):
                 channel = channel.split(':')
                 show_alert(key, dBm, mac[1].strip(), ssid[1].strip(), channel[1].strip())
                 return
-    first_window(f1)
+    no_drone(f3)
     return
 
 def scan_cmd_linux(mac_address):
@@ -65,7 +67,7 @@ def scan_cmd_linux(mac_address):
     for key in mac_address:
         for item in mac_address[key]:
             print(item)
-
+            linecache.checkcache(filename="scans.txt")
             ssidLine=get_line_number(item,"scans.txt")
             if (ssidLine>0):
                 # Search in specific line
@@ -74,7 +76,7 @@ def scan_cmd_linux(mac_address):
                 channel=linecache.getline('scans.txt', ssidLine+1)
                 signal=linecache.getline('scans.txt', ssidLine+3)
                 ssid = linecache.getline('scans.txt', ssidLine+5)
-
+                linecache.clearcache()
                 dBm = signal.split('=',2)
                 dBm = dBm[2].split(' ')
                 mac = mac.split(':',1)
@@ -83,7 +85,7 @@ def scan_cmd_linux(mac_address):
                 channel = channel.split(':')
                 show_alert(key, dBm[0].strip(), mac[1].strip(), ssid[1].strip(), channel[1].strip())
                 return
-    first_window(f1)
+    no_drone(f3)
     return
 
 def show_alert(drone,dBm, mac, ssid, channel):
@@ -100,10 +102,11 @@ def show_alert(drone,dBm, mac, ssid, channel):
     drone_img = ImageTk.PhotoImage(Image.open(drone+".png"))
     Label(f2, image = drone_img).pack(side = "top", fill = "both", expand = "yes")
     play_sound()
-    f2.after(7000, no_drone,f3)
+    f2.after(9000, no_drone,f3)
     return
 
 def no_drone(f3):
+    os.remove("scans.txt")
     destroy_widgets(f1)
     first_window(f1)
 
@@ -144,7 +147,6 @@ def scan_to_file():
 
 from tkinter import PhotoImage
 from tkinter import Label
-
 from PIL import Image, ImageTk
 
 
