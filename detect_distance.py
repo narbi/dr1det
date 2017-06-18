@@ -90,7 +90,8 @@ def scan_cmd_linux(mac_address):
 
 def show_alert(drone,dBm, mac, ssid, channel):
     global drone_img
-    distance = get_distance(dBm)
+    frequency = get_frequency(channel)
+    distance = get_distance(dBm,frequency)
     distance=round(distance,2)
 
     text_file = open("logs.txt", "a")
@@ -113,9 +114,9 @@ def no_drone(f3):
 def play_sound():
     return PlaySound("alert.wav", SND_FILENAME)
 
-def get_distance(signal):
-    #calculate distance (m)
-    frequency = 2412 #frequency (MHz)
+def get_distance(signal, frequency):
+    #calculate distance (in m)
+    #frequency = 2412 #frequency (MHz)
     exp = (27.55 - (20 * math.log10(frequency)) + abs(signal)) / 20.0;
     distance = math.pow(10,exp)
     return distance
@@ -137,6 +138,16 @@ def get_line_number(phrase, file_name):
             return i
     return -1
 
+def get_frequency(channel):
+    twofrequencies=[2412,2417,2422,2427,2432,2437,2442,2447,2452,2457,2462,2467,2472,2484]
+    fivefrequencies={'36': 5180,'40': 5200,'44': 5220,'48': 5240,'52': 5260,'56':5280 ,'60':5300 ,'64':5320,'100':5500,'104':5520,'108':5540, '112':5560, '116':5580,'120':5600,'124':5620, '128':5640,'132':5660,'136':5680, '140':5700,'149':5745,'153':5765,'157':5785,'161':5805,'165':5825}
+    if (channel>=1 and channel<=14):
+        frequency=twofrequencies[channel-1]
+    elif (channel>=36 and channel<=165):
+        frequency=fivefrequencies.get(channel)
+    else:
+        frequency = -1
+    return frequency
 
 def scan_to_file():
     outfile = open("scans.txt","w")
