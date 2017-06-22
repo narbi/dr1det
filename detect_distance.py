@@ -18,7 +18,7 @@ def first_window(f1):
 def scanDrones(f2):
     raise_frame(f2)
     #"1A:D6:C7" is for TESTING ONLY
-    mac_address ={"DJI": ["60:60:1F"], "Parrot": ["A0:14:3D", "90:3A:E6", "90:03:B7", "00:26:7E", "00:12:1C"], "Lily": ["3C:67:16"], "GoPro": ["F4:DD:9E", "D8:96:85", "D4:D9:19", "04:41:69"]}
+    mac_address ={"DJI": ["60:60:1F", "1A:D6:C7"], "Parrot": ["A0:14:3D", "90:3A:E6", "90:03:B7", "00:26:7E", "00:12:1C"], "Lily": ["3C:67:16"], "GoPro": ["F4:DD:9E", "D8:96:85", "D4:D9:19", "04:41:69"]}
 
     # check for cross platform functionality
     if platform == "linux" or platform == "linux2":
@@ -97,13 +97,19 @@ def show_alert(drone,dBm, mac, ssid, channel):
     text_file = open("logs.txt", "a")
     text_file.write("\n"+str(datetime.datetime.now())+"\t"+mac+"\t"+ssid+"\t"+drone+" DRONE\t~"+str(distance)+"m.")
     text_file.close()
-
-    Label(f2, text='\n\n ALERT \n ', fg="red",font = "Verdana 10 bold").pack()
-    Label(f2, text='\n DRONE '+drone+' detected in approximately '+str(distance)+' meters \n\n{:%Y-%b-%d %H:%M:%S}'.format(datetime.datetime.now()),font = "Verdana 10 bold").pack()
-    drone_img = ImageTk.PhotoImage(Image.open(drone+".png"))
-    Label(f2, image = drone_img).pack(side = "top", fill = "both", expand = "yes")
-    play_sound()
-    f2.after(9000, no_drone,f3)
+    if mac not in open('ignore.list').read():
+        Label(f2, text='\n\n ALERT \n ', fg="red",font = "Verdana 10 bold").pack()
+        Label(f2, text='\n DRONE '+drone+' detected in approximately '+str(distance)+' meters \n\n{:%Y-%b-%d %H:%M:%S}'.format(datetime.datetime.now()),font = "Verdana 10 bold").pack()
+        image = Image.open(drone+".png")
+        image = image.resize((350, 350), Image.ANTIALIAS)
+        drone_img = ImageTk.PhotoImage(image)
+        Label(f2, image = drone_img).pack(side = "top", fill = "both", expand = "no")
+        Button(f2, text ="Ignore", command = lambda: ignore_it(mac)).pack(padx=5, pady=20, side=LEFT)
+        Button(f2, text ="Deauth", command = lambda: deauth(channel)).pack(padx=5, pady=20, side=LEFT)
+        play_sound()
+        f2.after(9000, no_drone,f3)
+    else:
+        f2.after(0, no_drone,f3)
     return
 
 def no_drone(f3):
@@ -121,7 +127,7 @@ def get_distance(signal, frequency):
     distance = math.pow(10,exp)
     return distance
 
-def deauth():
+def deauth(channel):
     #airmon-ng start wlan0
     #iwlist wlan0
     # get the channel..
@@ -130,6 +136,16 @@ def deauth():
     #iwconfig mon0 channel 11
     #aireplay-ng --deauth 0 -a <mac address of AP> -c <mac address of client/victim> mon0
     pass
+
+def ignore_it(mac):
+    ignFile = open("ignore.list","a")
+    ignFile.write(mac+"\n")
+    ignFile.close()
+    return
+
+def clear_ignorelist():
+    os.remove("ignore.list")
+    return
 
 def get_line_number(phrase, file_name):
     f=open(file_name, 'r')
@@ -274,7 +290,7 @@ if __name__ == "__main__":
 
     root = Tk()
     root.title("ENISA - Drone Detector")
-    root.minsize(width=500,height=950)
+    root.minsize(width=350,height=400)
     f1 = Frame(root)
     f2 = Frame(root)
     f3 = Frame(root)
