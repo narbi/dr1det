@@ -9,6 +9,7 @@ def destroy_widgets(frame):
         widget.destroy()
 
 def first_window(f1):
+    Button(f1, text =" ※ ", command = lambda: clear_ignorelist()).pack(padx=5, pady=5, side=BOTTOM, anchor="e")
     gif = AnimatedGIF(f1, "radar_.gif")
     gif.pack(side = "top", fill = "both", expand = "true", padx = 100, pady = 150)
     raise_frame(f1)
@@ -40,14 +41,14 @@ def scan_cmd_windows(mac_address):
         for lookup in mac_address[key]:
             print(lookup)
             linecache.clearcache()
-            linecache.checkcache(filename="scans.txt")
-            ssidLine=get_line_number(lookup.lower(),"scans.txt")
+            linecache.checkcache(filename="scans.tmp")
+            ssidLine=get_line_number(lookup.lower(),"scans.tmp")
             if (ssidLine>0):
                 # Search in specific line
-                ssid = linecache.getline('scans.txt', ssidLine-4)
-                mac = linecache.getline('scans.txt', ssidLine)
-                signal=linecache.getline('scans.txt', ssidLine+1)
-                channel=linecache.getline('scans.txt', ssidLine+3)
+                ssid = linecache.getline('scans.tmp', ssidLine-4)
+                mac = linecache.getline('scans.tmp', ssidLine)
+                signal=linecache.getline('scans.tmp', ssidLine+1)
+                channel=linecache.getline('scans.tmp', ssidLine+3)
                 linecache.clearcache()
                 quality = signal.split(':')
                 quality = quality[1].split('%')
@@ -62,20 +63,20 @@ def scan_cmd_windows(mac_address):
     return
 
 def scan_cmd_linux(mac_address):
-    scan = os.popen("sudo iwlist wlan0 scan > scans.txt")
+    scan = os.popen("sudo iwlist wlan0 scan > scans.tmp")
     time.sleep(0.5)
     for key in mac_address:
         for item in mac_address[key]:
             print(item)
-            linecache.checkcache(filename="scans.txt")
-            ssidLine=get_line_number(item,"scans.txt")
+            linecache.checkcache(filename="scans.tmp")
+            ssidLine=get_line_number(item,"scans.tmp")
             if (ssidLine>0):
                 # Search in specific line
 
-                mac = linecache.getline('scans.txt', ssidLine)
-                channel=linecache.getline('scans.txt', ssidLine+1)
-                signal=linecache.getline('scans.txt', ssidLine+3)
-                ssid = linecache.getline('scans.txt', ssidLine+5)
+                mac = linecache.getline('scans.tmp', ssidLine)
+                channel=linecache.getline('scans.tmp', ssidLine+1)
+                signal=linecache.getline('scans.tmp', ssidLine+3)
+                ssid = linecache.getline('scans.tmp', ssidLine+5)
                 linecache.clearcache()
                 dBm = signal.split('=',2)
                 dBm = dBm[2].split(' ')
@@ -83,7 +84,7 @@ def scan_cmd_linux(mac_address):
                 ssid = ssid.split(':')
                 ssid.replace('\"','')
                 channel = channel.split(':')
-                show_alert(key, dBm[0].strip(), mac[1].strip(), ssid[1].strip(), channel[1].strip())
+                show_alert(key.lower(), dBm[0].strip(), mac[1].strip(), ssid[1].strip(), channel[1].strip())
                 return
     no_drone(f3)
     return
@@ -98,14 +99,15 @@ def show_alert(drone,dBm, mac, ssid, channel):
     text_file.write("\n"+str(datetime.datetime.now())+"\t"+mac+"\t"+ssid+"\t"+drone+" DRONE\t~"+str(distance)+"m.")
     text_file.close()
     if mac not in open('ignore.list').read():
+        ssid = ssid.split('_')
         Label(f2, text='\n\n ALERT \n ', fg="red",font = "Verdana 10 bold").pack()
-        Label(f2, text='\n DRONE '+drone+' detected in approximately '+str(distance)+' meters \n\n{:%Y-%b-%d %H:%M:%S}'.format(datetime.datetime.now()),font = "Verdana 10 bold").pack()
-        image = Image.open(drone+".png")
-        image = image.resize((350, 350), Image.ANTIALIAS)
+        Label(f2, text='\n DRONE '+drone+' '+ssid[0]+' detected in approximately '+str(distance)+' meters \n\n{:%Y-%b-%d %H:%M:%S}'.format(datetime.datetime.now()),font = "Verdana 10 bold").pack()
+        image = Image.open("images/"+drone+".png")
+        image = image.resize((400, 400), Image.ANTIALIAS)
         drone_img = ImageTk.PhotoImage(image)
         Label(f2, image = drone_img).pack(side = "top", fill = "both", expand = "no")
-        Button(f2, text ="Ignore", command = lambda: ignore_it(mac)).pack(padx=5, pady=20, side=LEFT)
-        Button(f2, text ="Deauth", command = lambda: deauth(channel)).pack(padx=5, pady=20, side=LEFT)
+        Button(f2, text ="Ignore", command = lambda: ignore_it(mac)).pack(padx=255, pady=20, side=LEFT)
+        # Button(f2, text ="Deauth", command = lambda: deauth(channel)).pack(padx=5, pady=20, side=LEFT)
         play_sound()
         f2.after(9000, no_drone,f3)
     else:
@@ -113,7 +115,7 @@ def show_alert(drone,dBm, mac, ssid, channel):
     return
 
 def no_drone(f3):
-    os.remove("scans.txt")
+    os.remove("scans.tmp")
     destroy_widgets(f1)
     first_window(f1)
 
@@ -144,7 +146,8 @@ def ignore_it(mac):
     return
 
 def clear_ignorelist():
-    os.remove("ignore.list")
+    # os.remove("ignore.list")
+    open("ignore.list","w").close()
     return
 
 def get_line_number(phrase, file_name):
@@ -167,7 +170,7 @@ def get_frequency(channel):
     return frequency
 
 def scan_to_file():
-    outfile = open("scans.txt","w")
+    outfile = open("scans.tmp","w")
     subprocess.Popen('netsh wlan show network mode=bssid',stdout=outfile)
     outfile.close()
     return
@@ -290,7 +293,7 @@ if __name__ == "__main__":
 
     root = Tk()
     root.title("ENISA - Drone Detector")
-    root.minsize(width=350,height=400)
+    root.minsize(width=250,height=400)
     f1 = Frame(root)
     f2 = Frame(root)
     f3 = Frame(root)
