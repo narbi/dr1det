@@ -9,7 +9,7 @@ def destroy_widgets(frame):
         widget.destroy()
 
 def first_window(f1):
-    Button(f1, text =" ※ ", command = lambda: clear_ignorelist()).pack(padx=5, pady=5, side=BOTTOM, anchor="e")
+    Button(f1, text =" ※ ", command = lambda: clear_ignorelist()).pack(padx=5, pady=5, side=TOP, anchor="e")
     gif = AnimatedGIF(f1, "radar_.gif")
     gif.pack(side = "top", fill = "both", expand = "true", padx = 100, pady = 150)
     raise_frame(f1)
@@ -18,8 +18,7 @@ def first_window(f1):
 
 def scanDrones(f2):
     raise_frame(f2)
-    #"1A:D6:C7" is for TESTING ONLY
-    mac_address ={"DJI": ["60:60:1F", "1A:D6:C7"], "Parrot": ["A0:14:3D", "90:3A:E6", "90:03:B7", "00:26:7E", "00:12:1C"], "Lily": ["3C:67:16"], "GoPro": ["F4:DD:9E", "D8:96:85", "D4:D9:19", "04:41:69"]}
+    mac_address ={"DJI": ["60:60:1F"], "Parrot": ["A0:14:3D", "90:3A:E6", "90:03:B7", "00:26:7E", "00:12:1C"], "Lily": ["3C:67:16"], "GoPro": ["F4:DD:9E", "D8:96:85", "D4:D9:19", "04:41:69"]}
 
     # check for cross platform functionality
     if platform == "linux" or platform == "linux2":
